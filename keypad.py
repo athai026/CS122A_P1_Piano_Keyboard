@@ -1,6 +1,8 @@
 import RPi.GPIO as GPIO
 import time
 
+import lcd
+
 C1 = 26
 C2 = 19
 C3 = 13
@@ -28,12 +30,16 @@ def readLine(line, characters):
     GPIO.output(line, GPIO.HIGH)
     if(GPIO.input(C1) == 1):
         print(characters[0])
+        lcd.lcd_string(characters[0],lcd.LCD_LINE_1)
     if(GPIO.input(C2) == 1):
         print(characters[1])
+        lcd.lcd_string(characters[1],lcd.LCD_LINE_1)
     if(GPIO.input(C3) == 1):
         print(characters[2])
+        lcd.lcd_string(characters[2],lcd.LCD_LINE_1)
     if(GPIO.input(C4) == 1):
         print(characters[3])
+        lcd.lcd_string(characters[3],lcd.LCD_LINE_1)
     GPIO.output(line, GPIO.LOW)
 
 def main():
