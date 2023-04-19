@@ -1,3 +1,4 @@
+#using code from https://maker.pro/raspberry-pi/tutorial/how-to-use-a-keypad-with-a-raspberry-pi-4
 import RPi.GPIO as GPIO
 import time
 
@@ -30,28 +31,14 @@ def readLine(line, characters):
     GPIO.output(line, GPIO.HIGH)
     if(GPIO.input(C1) == 1):
         print(characters[0])
-        lcd.lcd_string(characters[0],lcd.LCD_LINE_1)
+        lcd.lcd_string("Key pressed: " + characters[0],lcd.LCD_LINE_1)
     if(GPIO.input(C2) == 1):
         print(characters[1])
-        lcd.lcd_string(characters[1],lcd.LCD_LINE_1)
+        lcd.lcd_string("Key pressed: " + characters[1],lcd.LCD_LINE_1)
     if(GPIO.input(C3) == 1):
         print(characters[2])
-        lcd.lcd_string(characters[2],lcd.LCD_LINE_1)
+        lcd.lcd_string("Key pressed: " + characters[2],lcd.LCD_LINE_1)
     if(GPIO.input(C4) == 1):
         print(characters[3])
-        lcd.lcd_string(characters[3],lcd.LCD_LINE_1)
+        lcd.lcd_string("Key pressed: " + characters[3],lcd.LCD_LINE_1)
     GPIO.output(line, GPIO.LOW)
-
-def main():
-    try:
-        while True:
-            readLine(L1, ["1","2","3","A"])
-            readLine(L2, ["4","5","6","B"])
-            readLine(L3, ["7","8","9","C"])
-            readLine(L4, ["*","0","#","D"])
-            time.sleep(0.1)
-    except KeyboardInterrupt:
-        print("\nApplication stopped!")
- 
-if __name__ == '__main__':
-    main()

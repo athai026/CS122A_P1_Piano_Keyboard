@@ -22,7 +22,7 @@ LCD_LINE_2 = 0xC0 # LCD RAM address for the 2nd line
 E_PULSE = 0.0005
 E_DELAY = 0.0005
  
-def main():
+def lcd_start():
   # Main program block
   GPIO.setwarnings(False)
   GPIO.setmode(GPIO.BCM)       # Use BCM GPIO numbers
@@ -35,32 +35,6 @@ def main():
  
   # Initialise display
   lcd_init()
- 
-  while True:
- 
-    # Send some test
-    lcd_string("Rasbperry Pi",LCD_LINE_1)
-    lcd_string("16x2 LCD Test",LCD_LINE_2)
- 
-    time.sleep(3) # 3 second delay
- 
-    # Send some text
-    lcd_string("1234567890123456",LCD_LINE_1)
-    lcd_string("abcdefghijklmnop",LCD_LINE_2)
- 
-    time.sleep(3) # 3 second delay
- 
-    # Send some text
-    lcd_string("RaspberryPi-spy",LCD_LINE_1)
-    lcd_string(".co.uk",LCD_LINE_2)
- 
-    time.sleep(3)
- 
-    # Send some text
-    lcd_string("Follow me on",LCD_LINE_1)
-    lcd_string("Twitter @RPiSpy",LCD_LINE_2)
- 
-    time.sleep(3)
  
 def lcd_init():
   # Initialise display
@@ -131,14 +105,3 @@ def lcd_string(message,line):
  
   for i in range(LCD_WIDTH):
     lcd_byte(ord(message[i]),LCD_CHR)
- 
-if __name__ == '__main__':
- 
-  try:
-    main()
-  except KeyboardInterrupt:
-    pass
-  finally:
-    lcd_byte(0x01, LCD_CMD)
-    lcd_string("Goodbye!",LCD_LINE_1)
-    GPIO.cleanup()

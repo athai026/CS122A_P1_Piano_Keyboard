@@ -14,18 +14,9 @@ L3 = 9
 L4 = 10
 
 def main():
-    # Main program block
-    GPIO.setwarnings(False)
-    GPIO.setmode(GPIO.BCM)       # Use BCM GPIO numbers
-    GPIO.setup(lcd.LCD_E, GPIO.OUT)  # E
-    GPIO.setup(lcd.LCD_RS, GPIO.OUT) # RS
-    GPIO.setup(lcd.LCD_D4, GPIO.OUT) # DB4
-    GPIO.setup(lcd.LCD_D5, GPIO.OUT) # DB5
-    GPIO.setup(lcd.LCD_D6, GPIO.OUT) # DB6
-    GPIO.setup(lcd.LCD_D7, GPIO.OUT) # DB7
- 
     # Initialise display
-    lcd.lcd_init()
+    lcd.lcd_start()
+    
     try:
         while True:
             keypad.readLine(L1, ["1","2","3","A"])
