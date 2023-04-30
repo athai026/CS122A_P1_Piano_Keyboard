@@ -14,18 +14,19 @@ L2 = 11
 L3 = 9
 L4 = 10
 
-GPIO.setwarnings(False)
-GPIO.setmode(GPIO.BCM)
+def keypad_start():
+    GPIO.setwarnings(False)
+    GPIO.setmode(GPIO.BCM)
 
-GPIO.setup(L1, GPIO.OUT)
-GPIO.setup(L2, GPIO.OUT)
-GPIO.setup(L3, GPIO.OUT)
-GPIO.setup(L4, GPIO.OUT)
+    GPIO.setup(L1, GPIO.OUT)
+    GPIO.setup(L2, GPIO.OUT)
+    GPIO.setup(L3, GPIO.OUT)
+    GPIO.setup(L4, GPIO.OUT)
 
-GPIO.setup(C1, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(C2, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(C3, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(C4, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.setup(C1, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.setup(C2, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.setup(C3, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.setup(C4, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 def readLine(line, characters):
     key = ''
@@ -46,5 +47,7 @@ def readLine(line, characters):
         # print(characters[3])
         # lcd.lcd_string("Key pressed: " + characters[3],lcd.LCD_LINE_1)
         key = characters[3]
+    else:
+        key = ''
     GPIO.output(line, GPIO.LOW)
     return key
