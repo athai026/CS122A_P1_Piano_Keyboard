@@ -4,15 +4,15 @@ import time
 
 import lcd
 
-C1 = 26
-C2 = 19
-C3 = 13
-C4 = 6
+C1 = 9
+C2 = 10
+C3 = 22
+C4 = 27
 
-L1 = 5
-L2 = 11
-L3 = 9
-L4 = 10
+L1 = 17
+L2 = 4
+L3 = 3
+L4 = 2
 
 def keypad_start():
     GPIO.setwarnings(False)
