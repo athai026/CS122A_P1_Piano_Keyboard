@@ -6,6 +6,7 @@ import speaker
 import button
 import RPi.GPIO as GPIO
 from enum import Enum
+from timeit import default_timer as timer
 
 class task:
     def __init__(self, state, period, elapsedTime, func):
@@ -26,13 +27,32 @@ class getKeyPadStates(Enum):
 kpState = Enum('getKeyPadStates', ['startKey', 'getKey', 'waitKey', 'changeOctaveDown', 'changeOctaveUp', 'changeRangeDown', 'changeRangeUp'])
 
 note = 40 # starting index of keyboard note
+key = '' # key being pressed
+timerStarted = 0
+startTime = 0
+endTime = 0
 
 def KeyPad(state):
     global note
     global recordStart
+    global key
+    global timerStarted
+    global startTime
+    global endTime
     # transitions
-    key = ''
+    prevKey = key
     key = getKeyPadInput()
+    if recordStart == 1:
+        if timerStarted == 0:
+            startTime = timer()
+            timerStarted = 1
+        if prevKey != key:
+            endTime = timer()
+            saveRecording(prevKey, startTime, endTime)
+            startTime = timer()
+    else:
+        timerStarted = 0
+
     if state == kpState.startKey:
         state = kpState.waitKey
     elif state == kpState.getKey:
@@ -92,7 +112,7 @@ def KeyPad(state):
                 lcd.lcd_string("Not recording",lcd.LCD_LINE_2)
             elif recordStart == 1:
                 lcd.lcd_string("Recording",lcd.LCD_LINE_2)
-                speaker.p.start(70)
+            speaker.p.start(70)
             speaker.p.ChangeFrequency(notes.octave[note+1][1])
         elif key == '3':
             lcd.lcd_string("Key: " + str(notes.octave[note+2][0]),lcd.LCD_LINE_1)
@@ -225,6 +245,43 @@ def getKeyPadInput():
         return key
     key = keypad.readLine(keypad.L4, ["*","0","#","D"])
     return key
+
+recording = []
+
+def saveRecording(prevKey, start, end):
+    global recording
+    global note
+
+    freq = ''
+    if prevKey == '1':
+        freq = notes.octave[note][1]
+    elif prevKey == '2':
+        freq = notes.octave[note+1][1]
+    elif prevKey == '3':
+        freq = notes.octave[note+2][1]
+    elif prevKey == '4':
+        freq = notes.octave[note+3][1]
+    elif prevKey == '5':
+        freq = notes.octave[note+4][1]
+    elif prevKey == '6':
+        freq = notes.octave[note+5][1]
+    elif prevKey == '7':
+        freq = notes.octave[note+6][1]
+    elif prevKey == '8':
+        freq = notes.octave[note+7][1]
+    elif prevKey == '9':
+        freq = notes.octave[note+8][1]
+    elif prevKey == '*':
+        freq = notes.octave[note+9][1]
+    elif prevKey == '0':
+        freq = notes.octave[note+10][1]
+    elif prevKey == '#':
+        freq = notes.octave[note+11][1]
+    else:
+        freq = 0
+
+    recording.append([freq, start, end])
+
         
 class getRecStates(Enum):
     startRec = 1
@@ -315,6 +372,8 @@ def main():
 
             time.sleep(0.1)
     except KeyboardInterrupt:
+        for x in recording:
+            print(x)
         print("\nApplication stopped!")
 
     
