@@ -28,17 +28,23 @@ GPIO.setup(C3, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 GPIO.setup(C4, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 def readLine(line, characters):
+    key = ''
     GPIO.output(line, GPIO.HIGH)
     if(GPIO.input(C1) == 1):
-        print(characters[0])
-        lcd.lcd_string("Key pressed: " + characters[0],lcd.LCD_LINE_1)
-    if(GPIO.input(C2) == 1):
-        print(characters[1])
-        lcd.lcd_string("Key pressed: " + characters[1],lcd.LCD_LINE_1)
-    if(GPIO.input(C3) == 1):
-        print(characters[2])
-        lcd.lcd_string("Key pressed: " + characters[2],lcd.LCD_LINE_1)
-    if(GPIO.input(C4) == 1):
-        print(characters[3])
-        lcd.lcd_string("Key pressed: " + characters[3],lcd.LCD_LINE_1)
+        # print(characters[0])
+        # lcd.lcd_string("Key pressed: " + characters[0],lcd.LCD_LINE_1)
+        key = characters[0]
+    elif(GPIO.input(C2) == 1):
+        # print(characters[1])
+        # lcd.lcd_string("Key pressed: " + characters[1],lcd.LCD_LINE_1)
+        key = characters[1]
+    elif(GPIO.input(C3) == 1):
+        # print(characters[2])
+        # lcd.lcd_string("Key pressed: " + characters[2],lcd.LCD_LINE_1)
+        key = characters[2]
+    elif(GPIO.input(C4) == 1):
+        # print(characters[3])
+        # lcd.lcd_string("Key pressed: " + characters[3],lcd.LCD_LINE_1)
+        key = characters[3]
     GPIO.output(line, GPIO.LOW)
+    return key
