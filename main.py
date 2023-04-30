@@ -7,6 +7,7 @@ import button
 import RPi.GPIO as GPIO
 from enum import Enum
 from timeit import default_timer as timer
+import numpy as np
 
 class task:
     def __init__(self, state, period, elapsedTime, func):
@@ -289,36 +290,48 @@ class getRecStates(Enum):
     releaseRec = 3
     waitStopRec = 4
     stopRecRelease = 5
+    waitPlayback = 6
+    releasePlayback = 7
 
-recState = Enum('getRecStates', ['startRec', 'waitRec', 'releaseRec', 'waitStopRec', 'stopRecRelease'])
+recState = Enum('getRecStates', ['startRec', 'waitRec', 'releaseRec', 'waitStopRec', 'stopRecRelease', 'waitPlayback', 'releasePlayback'])
 
 recordStart = 0
 
 def Recording(state):
     global recordStart
+    global recording
     # transitions
     if state == recState.startRec:
         state = recState.waitRec
     elif state == recState.waitRec:
-        if GPIO.input(20) == 1:
+        if GPIO.input(21) == 1:
             state = recState.releaseRec
+        elif GPIO.input(16) == 1:
+            state = recState.waitPlayback
         else:
             state = recState.waitRec
     elif state == recState.releaseRec:
-        if GPIO.input(20) == 0:
+        if GPIO.input(21) == 0:
             state = recState.waitStopRec
         else:
             state = recState.releaseRec
     elif state == recState.waitStopRec:
-        if GPIO.input(21) == 1:
+        if GPIO.input(20) == 1:
             state = recState.stopRecRelease
         else:
             state = recState.waitStopRec
     elif state == recState.stopRecRelease:
-        if GPIO.input(21) == 0:
+        if GPIO.input(20) == 0:
             state = recState.waitRec
         else:
             state = recState.stopRecRelease
+    elif state == recState.waitPlayback:
+        if GPIO.input(16) == 1:
+            state = recState.waitPlayback
+        else:
+            state = recState.releasePlayback
+    elif state == recState.releasePlayback:
+        state = recState.waitRec
     
     # state actions
     if state == recState.startRec:
@@ -327,10 +340,28 @@ def Recording(state):
         recordStart = 0
     elif state == recState.releaseRec:
         recordStart = 0
+        recording.clear()
     elif state == recState.waitStopRec:
         recordStart = 1
     elif state == recState.stopRecRelease:
         recordStart = 1
+    elif state == recState.waitPlayback:
+        recordStart = 0
+        lcd.lcd_string("Playback",lcd.LCD_LINE_1)
+        lcd.lcd_string("",lcd.LCD_LINE_2)
+        for x in range(len(recording)):
+            print(recording[x])
+            for y in np.arange(recording[x][1], recording[x][2], 0.1):
+                print(y)
+                if recording[x][0] != 0:
+                    speaker.p.start(70)
+                    speaker.p.ChangeFrequency(recording[x][0])
+                else: 
+                    speaker.p.stop()
+                time.sleep(0.1)
+        speaker.p.stop()
+
+
 
     return state
 
@@ -372,8 +403,6 @@ def main():
 
             time.sleep(0.1)
     except KeyboardInterrupt:
-        for x in recording:
-            print(x)
         print("\nApplication stopped!")
 
     
