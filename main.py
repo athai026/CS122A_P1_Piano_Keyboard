@@ -355,6 +355,9 @@ def Recording(state):
         recordStart = False
     elif state == recState.waitChoice:
         waitingInput = True
+        if GPIO.input(5) == 1:
+            waitingInput = False
+            state = recState.waitRec
         lcd.lcd_string("Which recording?", lcd.LCD_LINE_1)
         lcd.lcd_string("1 2 3 4 5", lcd.LCD_LINE_2)
         userChoice = getKeyPadInput()
