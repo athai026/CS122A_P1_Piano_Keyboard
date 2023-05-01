@@ -29,44 +29,46 @@ kpState = Enum('getKeyPadStates', ['startKey', 'getKey', 'waitKey', 'changeOctav
 
 note = 40 # starting index of keyboard note
 key = '' # key being pressed
-timerStarted = 0
+timerStarted = False
 startTime = 0
 endTime = 0
 
-def KeyPad(state):
+def Piano(state):
     global note
     global recordStart
     global key
     global timerStarted
     global startTime
     global endTime
+    global waitingInput
     # transitions
     prevKey = key
     key = getKeyPadInput()
-    if recordStart == 1:
-        if timerStarted == 0:
+    if recordStart:
+        if not timerStarted:
             startTime = timer()
-            timerStarted = 1
+            timerStarted = True
         if prevKey != key:
             endTime = timer()
             saveRecording(prevKey, startTime, endTime)
             startTime = timer()
     else:
-        timerStarted = 0
+        timerStarted = False
 
     if state == kpState.startKey:
         state = kpState.waitKey
     elif state == kpState.getKey:
-        if key == 'A':
-            state = kpState.changeRangeDown
-        elif key == 'B':
-            state = kpState.changeRangeUp
-        elif key == 'C':
-            state = kpState.changeOctaveDown
-        elif key == 'D':
-            state = kpState.changeOctaveUp
-        else:
-            state = kpState.getKey
+        if not waitingInput:
+            if key == 'A':
+                state = kpState.changeRangeDown
+            elif key == 'B':
+                state = kpState.changeRangeUp
+            elif key == 'C':
+                state = kpState.changeOctaveDown
+            elif key == 'D':
+                state = kpState.changeOctaveUp
+            else:
+                state = kpState.getKey
     elif state == kpState.changeOctaveDown:
         if key != '':
             state = kpState.waitKey
@@ -99,70 +101,71 @@ def KeyPad(state):
     if state == kpState.startKey:
         state = kpState.getKey
     elif state == kpState.getKey:
-        if key == '1':
-            lcd.lcd_string("Key: " + str(notes.octave[note][0]),lcd.LCD_LINE_1)
-            printRecState()
-            speaker.p.start(70)
-            speaker.p.ChangeFrequency(notes.octave[note][1])
-        elif key == '2':
-            lcd.lcd_string("Key: " + str(notes.octave[note+1][0]),lcd.LCD_LINE_1)
-            printRecState()
-            speaker.p.start(70)
-            speaker.p.ChangeFrequency(notes.octave[note+1][1])
-        elif key == '3':
-            lcd.lcd_string("Key: " + str(notes.octave[note+2][0]),lcd.LCD_LINE_1)
-            printRecState()
-            speaker.p.start(70)
-            speaker.p.ChangeFrequency(notes.octave[note+2][1])
-        elif key == '4':
-            lcd.lcd_string("Key: " + str(notes.octave[note+3][0]),lcd.LCD_LINE_1)
-            printRecState()
-            speaker.p.start(70)
-            speaker.p.ChangeFrequency(notes.octave[note+3][1])
-        elif key == '5':
-            lcd.lcd_string("Key: " + str(notes.octave[note+4][0]),lcd.LCD_LINE_1)
-            printRecState()
-            speaker.p.start(70)
-            speaker.p.ChangeFrequency(notes.octave[note+4][1])
-        elif key == '6':
-            lcd.lcd_string("Key: " + str(notes.octave[note+5][0]),lcd.LCD_LINE_1)
-            printRecState()
-            speaker.p.start(70)
-            speaker.p.ChangeFrequency(notes.octave[note+5][1])
-        elif key == '7':
-            lcd.lcd_string("Key: " + str(notes.octave[note+6][0]),lcd.LCD_LINE_1)
-            printRecState()
-            speaker.p.start(70)
-            speaker.p.ChangeFrequency(notes.octave[note+6][1])
-        elif key == '8':
-            lcd.lcd_string("Key: " + str(notes.octave[note+7][0]),lcd.LCD_LINE_1)
-            printRecState()
-            speaker.p.start(70)
-            speaker.p.ChangeFrequency(notes.octave[note+7][1])
-        elif key == '9':
-            lcd.lcd_string("Key: " + str(notes.octave[note+8][0]),lcd.LCD_LINE_1)
-            printRecState()
-            speaker.p.start(70)
-            speaker.p.ChangeFrequency(notes.octave[note+8][1])
-        elif key == '*':
-            lcd.lcd_string("Key: " + str(notes.octave[note+9][0]),lcd.LCD_LINE_1)
-            printRecState()
-            speaker.p.start(70)
-            speaker.p.ChangeFrequency(notes.octave[note+9][1])
-        elif key == '0':
-            lcd.lcd_string("Key: " + str(notes.octave[note+10][0]),lcd.LCD_LINE_1)
-            printRecState()
-            speaker.p.start(70)
-            speaker.p.ChangeFrequency(notes.octave[note+10][1])
-        elif key == '#':
-            lcd.lcd_string("Key: " + str(notes.octave[note+11][0]),lcd.LCD_LINE_1)
-            printRecState()
-            speaker.p.start(70)
-            speaker.p.ChangeFrequency(notes.octave[note+11][1])
-        elif key == '':
-            lcd.lcd_string("Key: ",lcd.LCD_LINE_1)
-            printRecState()
-            speaker.p.stop()
+        if not waitingInput:
+            if key == '1':
+                lcd.lcd_string("Key: " + str(notes.octave[note][0]),lcd.LCD_LINE_1)
+                printRecState()
+                speaker.p.start(70)
+                speaker.p.ChangeFrequency(notes.octave[note][1])
+            elif key == '2':
+                lcd.lcd_string("Key: " + str(notes.octave[note+1][0]),lcd.LCD_LINE_1)
+                printRecState()
+                speaker.p.start(70)
+                speaker.p.ChangeFrequency(notes.octave[note+1][1])
+            elif key == '3':
+                lcd.lcd_string("Key: " + str(notes.octave[note+2][0]),lcd.LCD_LINE_1)
+                printRecState()
+                speaker.p.start(70)
+                speaker.p.ChangeFrequency(notes.octave[note+2][1])
+            elif key == '4':
+                lcd.lcd_string("Key: " + str(notes.octave[note+3][0]),lcd.LCD_LINE_1)
+                printRecState()
+                speaker.p.start(70)
+                speaker.p.ChangeFrequency(notes.octave[note+3][1])
+            elif key == '5':
+                lcd.lcd_string("Key: " + str(notes.octave[note+4][0]),lcd.LCD_LINE_1)
+                printRecState()
+                speaker.p.start(70)
+                speaker.p.ChangeFrequency(notes.octave[note+4][1])
+            elif key == '6':
+                lcd.lcd_string("Key: " + str(notes.octave[note+5][0]),lcd.LCD_LINE_1)
+                printRecState()
+                speaker.p.start(70)
+                speaker.p.ChangeFrequency(notes.octave[note+5][1])
+            elif key == '7':
+                lcd.lcd_string("Key: " + str(notes.octave[note+6][0]),lcd.LCD_LINE_1)
+                printRecState()
+                speaker.p.start(70)
+                speaker.p.ChangeFrequency(notes.octave[note+6][1])
+            elif key == '8':
+                lcd.lcd_string("Key: " + str(notes.octave[note+7][0]),lcd.LCD_LINE_1)
+                printRecState()
+                speaker.p.start(70)
+                speaker.p.ChangeFrequency(notes.octave[note+7][1])
+            elif key == '9':
+                lcd.lcd_string("Key: " + str(notes.octave[note+8][0]),lcd.LCD_LINE_1)
+                printRecState()
+                speaker.p.start(70)
+                speaker.p.ChangeFrequency(notes.octave[note+8][1])
+            elif key == '*':
+                lcd.lcd_string("Key: " + str(notes.octave[note+9][0]),lcd.LCD_LINE_1)
+                printRecState()
+                speaker.p.start(70)
+                speaker.p.ChangeFrequency(notes.octave[note+9][1])
+            elif key == '0':
+                lcd.lcd_string("Key: " + str(notes.octave[note+10][0]),lcd.LCD_LINE_1)
+                printRecState()
+                speaker.p.start(70)
+                speaker.p.ChangeFrequency(notes.octave[note+10][1])
+            elif key == '#':
+                lcd.lcd_string("Key: " + str(notes.octave[note+11][0]),lcd.LCD_LINE_1)
+                printRecState()
+                speaker.p.start(70)
+                speaker.p.ChangeFrequency(notes.octave[note+11][1])
+            elif key == '':
+                lcd.lcd_string("Key: ",lcd.LCD_LINE_1)
+                printRecState()
+                speaker.p.stop()
     elif state == kpState.changeOctaveDown:
         if note - 12 <= 0:
             note = 1
@@ -276,17 +279,26 @@ class getRecStates(Enum):
     releaseRec = 3
     waitStopRec = 4
     releaseStopRec = 5
-    waitPlayback = 6
-    releasePlayback = 7
+    releasePlayback = 6
+    waitChoice = 7
+    playPlayback = 8
 
-recState = Enum('getRecStates', ['startRec', 'waitRec', 'releaseRec', 'waitStopRec', 'releaseStopRec', 'waitPlayback', 'releasePlayback'])
+recState = Enum('getRecStates', ['startRec', 'waitRec', 'releaseRec', 'waitStopRec', 'releaseStopRec', 'releasePlayback', 'waitChoice', 'playPlayback'])
 
-recordStart = 0
+recordStart = False
+validPlaybackNum = False
+validPlaybackChoices = ['1', '2', '3', '4', '5']
+waitingInput = False
+userChoice = ''
 
 def Recording(state):
     global recordStart
     global recording
     global numRecording
+    global validPlaybackNum
+    global validPlaybackChoices
+    global waitingInput
+    global userChoice
     # transitions
     if state == recState.startRec:
         state = recState.waitRec
@@ -294,7 +306,7 @@ def Recording(state):
         if GPIO.input(21) == 1:
             state = recState.releaseRec
         elif GPIO.input(16) == 1:
-            state = recState.waitPlayback
+            state = recState.releasePlayback
         else:
             state = recState.waitRec
     elif state == recState.releaseRec:
@@ -310,67 +322,76 @@ def Recording(state):
     elif state == recState.releaseStopRec:
         if GPIO.input(20) == 0:
             state = recState.waitRec
+            numRecording += 1
         else:
             state = recState.releaseStopRec
-    elif state == recState.waitPlayback:
-        if GPIO.input(16) == 1:
-            state = recState.waitPlayback
+    elif state == recState.releasePlayback:
+        if GPIO.input(16) == 0:
+            state = recState.waitChoice
         else:
             state = recState.releasePlayback
-    elif state == recState.releasePlayback:
+    elif state == recState.waitChoice:
+        if validPlaybackNum:
+            state = recState.playPlayback
+        else:
+            state = recState.waitChoice
+    elif state == recState.playPlayback:
         state = recState.waitRec
     
     # state actions
     if state == recState.startRec:
-        recordStart = 0
+        recordStart = False
     elif state == recState.waitRec:
-        recordStart = 0
+        recordStart = False
     elif state == recState.releaseRec:
-        recordStart = 0
+        recordStart = False
         numRecording = checkNumRecordings()
         recording[numRecording].clear()
     elif state == recState.waitStopRec:
-        print("recording in slot " + str(numRecording))
-        recordStart = 1
+        recordStart = True
     elif state == recState.releaseStopRec:
-        recordStart = 1
-        numRecording += 1
-    elif state == recState.waitPlayback:
-        recordStart = 0
-        validChoice = 0
-        while validChoice == 0:
-            lcd.lcd_string("Which recording?", lcd.LCD_LINE_1)
-            lcd.lcd_string("1 2 3 4 5", lcd.LCD_LINE_2)
-            decision = ''
-            while decision == '':
-                decision = getKeyPadInput()
-            if decision == '1' or decision == '2' or decision == '3' or decision == '4' or decision == '5':
-                validChoice = 1
-            else:
-                lcd.lcd_string("Invalid choice", lcd.LCD_LINE_1)
-                time.sleep(1)
-        lcd.lcd_string("Playback " + decision,lcd.LCD_LINE_1)
-        lcd.lcd_string("",lcd.LCD_LINE_2)
-        recIndex = int(decision) - 1
-        for x in range(len(recording[recIndex])):
-            print(recording[recIndex])
-            if not recording[recIndex][0]:
-                lcd.lcd_string("Slot empty", lcd.LCD_LINE_1)
-                lcd.lcd_string("", lcd.LCD_LINE_2)
-                time.sleep(1)
-            else:
-                for y in np.arange(recording[recIndex][x][1], recording[recIndex][x][2], 0.1):
+        recordStart = True
+    elif state == recState.releasePlayback:
+        recordStart = False
+    elif state == recState.waitChoice:
+        waitingInput = True
+        lcd.lcd_string("Which recording?", lcd.LCD_LINE_1)
+        lcd.lcd_string("1 2 3 4 5", lcd.LCD_LINE_2)
+        userChoice = getKeyPadInput()
+        if userChoice in validPlaybackChoices:
+            validPlaybackNum = True
+        elif userChoice != '':
+            validPlaybackNum = False
+            lcd.lcd_string("Invalid choice", lcd.LCD_LINE_1)
+            lcd.lcd_string("", lcd.LCD_LINE_2)
+            time.sleep(1)
+    elif state == recState.playPlayback:
+        waitingInput = False
+        validPlaybackNum = False
+        recIndex = int(userChoice) - 1
+        if not recording[recIndex][0]:
+            lcd.lcd_string("Slot empty", lcd.LCD_LINE_1)
+            lcd.lcd_string("", lcd.LCD_LINE_2)
+            time.sleep(1)
+        else:
+            lcd.lcd_string("Playback " + userChoice,lcd.LCD_LINE_1)
+            lcd.lcd_string("",lcd.LCD_LINE_2)
+            for x in range(len(recording[recIndex])):
+                print(recording[recIndex])
+                for y in np.arange(recording[recIndex][x][1], recording[recIndex][x][2], 0.01):
                     print(y)
                     if recording[recIndex][x][0] != 0:
                         speaker.p.start(70)
                         speaker.p.ChangeFrequency(recording[recIndex][x][0])
                     else: 
                         speaker.p.stop()
-                    time.sleep(0.1)
-        speaker.p.stop()
+                    time.sleep(0.01)
+            speaker.p.stop()
 
     return state
 
+numTasks = 2
+period_gcd = 0.01
 
 def main():
     # Initialise display
@@ -378,14 +399,16 @@ def main():
     lcd.lcd_string("Keyboard ready",lcd.LCD_LINE_1)
     keypad.keypad_start()
 
-    try:
-        state1 = kpState.startKey
-        state2 = recState.startRec
+    global numTasks
+    global period_gcd
 
+    try:
         # state, period, elapsedTime, func
-        # task1 = task(kpState.startKey, 0.1, 0.1, KeyPad)
-        # task2 = task(recState.startRec, 0.1, 0.1, Recording)
+        task1 = task(kpState.startKey, 0.01, 0, Piano)
+        task2 = task(recState.startRec, 0.01, 0, Recording)
         
+        tasks = [task1, task2]
+
         while True:
             # key = ''
             # temp = ''
@@ -401,12 +424,18 @@ def main():
             # temp = keypad.readLine(L4, ["*","0","#","D"])
             # if temp != '':
             #     print("key pressed: " + temp)
-            # time.sleep(0.1)
+            # time.sleep(0.01)
             
-            state1= KeyPad(state1)
-            state2 = Recording(state2)
+            # state1= Piano(state1)
+            # state2 = Recording(state2)
 
-            time.sleep(0.1)
+            for i in range(numTasks):
+                if (tasks[i].elapsedTime >= tasks[i].period):
+                    tasks[i].state = tasks[i].func(tasks[i].state)
+                    tasks[i].elapsedTime = 0
+                tasks[i].elapsedTime += period_gcd
+
+            time.sleep(period_gcd)
     except KeyboardInterrupt:
         print("\nApplication stopped!")
 
