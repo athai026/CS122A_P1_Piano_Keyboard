@@ -4,6 +4,7 @@ import time
 import notes
 import speaker
 import button
+import math
 import RPi.GPIO as GPIO
 from enum import Enum
 from timeit import default_timer as timer
@@ -41,6 +42,11 @@ def Piano(state):
     global startTime
     global endTime
     global waitingInput
+    global getBPM
+
+    if getBPM or waitingInput:
+        return state
+    
     # transitions
     prevKey = key
     key = getKeyPadInput()
@@ -58,17 +64,16 @@ def Piano(state):
     if state == kpState.startKey:
         state = kpState.waitKey
     elif state == kpState.getKey:
-        if not waitingInput:
-            if key == 'A':
-                state = kpState.changeRangeDown
-            elif key == 'B':
-                state = kpState.changeRangeUp
-            elif key == 'C':
-                state = kpState.changeOctaveDown
-            elif key == 'D':
-                state = kpState.changeOctaveUp
-            else:
-                state = kpState.getKey
+        if key == 'A':
+            state = kpState.changeRangeDown
+        elif key == 'B':
+            state = kpState.changeRangeUp
+        elif key == 'C':
+            state = kpState.changeOctaveDown
+        elif key == 'D':
+            state = kpState.changeOctaveUp
+        else:
+            state = kpState.getKey
     elif state == kpState.changeOctaveDown:
         if key != '':
             state = kpState.waitKey
@@ -101,71 +106,70 @@ def Piano(state):
     if state == kpState.startKey:
         state = kpState.getKey
     elif state == kpState.getKey:
-        if not waitingInput:
-            if key == '1':
-                lcd.lcd_string("Key: " + str(notes.octave[note][0]),lcd.LCD_LINE_1)
-                printRecState()
-                speaker.p.start(70)
-                speaker.p.ChangeFrequency(notes.octave[note][1])
-            elif key == '2':
-                lcd.lcd_string("Key: " + str(notes.octave[note+1][0]),lcd.LCD_LINE_1)
-                printRecState()
-                speaker.p.start(70)
-                speaker.p.ChangeFrequency(notes.octave[note+1][1])
-            elif key == '3':
-                lcd.lcd_string("Key: " + str(notes.octave[note+2][0]),lcd.LCD_LINE_1)
-                printRecState()
-                speaker.p.start(70)
-                speaker.p.ChangeFrequency(notes.octave[note+2][1])
-            elif key == '4':
-                lcd.lcd_string("Key: " + str(notes.octave[note+3][0]),lcd.LCD_LINE_1)
-                printRecState()
-                speaker.p.start(70)
-                speaker.p.ChangeFrequency(notes.octave[note+3][1])
-            elif key == '5':
-                lcd.lcd_string("Key: " + str(notes.octave[note+4][0]),lcd.LCD_LINE_1)
-                printRecState()
-                speaker.p.start(70)
-                speaker.p.ChangeFrequency(notes.octave[note+4][1])
-            elif key == '6':
-                lcd.lcd_string("Key: " + str(notes.octave[note+5][0]),lcd.LCD_LINE_1)
-                printRecState()
-                speaker.p.start(70)
-                speaker.p.ChangeFrequency(notes.octave[note+5][1])
-            elif key == '7':
-                lcd.lcd_string("Key: " + str(notes.octave[note+6][0]),lcd.LCD_LINE_1)
-                printRecState()
-                speaker.p.start(70)
-                speaker.p.ChangeFrequency(notes.octave[note+6][1])
-            elif key == '8':
-                lcd.lcd_string("Key: " + str(notes.octave[note+7][0]),lcd.LCD_LINE_1)
-                printRecState()
-                speaker.p.start(70)
-                speaker.p.ChangeFrequency(notes.octave[note+7][1])
-            elif key == '9':
-                lcd.lcd_string("Key: " + str(notes.octave[note+8][0]),lcd.LCD_LINE_1)
-                printRecState()
-                speaker.p.start(70)
-                speaker.p.ChangeFrequency(notes.octave[note+8][1])
-            elif key == '*':
-                lcd.lcd_string("Key: " + str(notes.octave[note+9][0]),lcd.LCD_LINE_1)
-                printRecState()
-                speaker.p.start(70)
-                speaker.p.ChangeFrequency(notes.octave[note+9][1])
-            elif key == '0':
-                lcd.lcd_string("Key: " + str(notes.octave[note+10][0]),lcd.LCD_LINE_1)
-                printRecState()
-                speaker.p.start(70)
-                speaker.p.ChangeFrequency(notes.octave[note+10][1])
-            elif key == '#':
-                lcd.lcd_string("Key: " + str(notes.octave[note+11][0]),lcd.LCD_LINE_1)
-                printRecState()
-                speaker.p.start(70)
-                speaker.p.ChangeFrequency(notes.octave[note+11][1])
-            elif key == '':
-                lcd.lcd_string("Key: ",lcd.LCD_LINE_1)
-                printRecState()
-                speaker.p.stop()
+        if key == '1':
+            lcd.lcd_string("Key: " + str(notes.octave[note][0]),lcd.LCD_LINE_1)
+            printRecState()
+            speaker.p.start(70)
+            speaker.p.ChangeFrequency(notes.octave[note][1])
+        elif key == '2':
+            lcd.lcd_string("Key: " + str(notes.octave[note+1][0]),lcd.LCD_LINE_1)
+            printRecState()
+            speaker.p.start(70)
+            speaker.p.ChangeFrequency(notes.octave[note+1][1])
+        elif key == '3':
+            lcd.lcd_string("Key: " + str(notes.octave[note+2][0]),lcd.LCD_LINE_1)
+            printRecState()
+            speaker.p.start(70)
+            speaker.p.ChangeFrequency(notes.octave[note+2][1])
+        elif key == '4':
+            lcd.lcd_string("Key: " + str(notes.octave[note+3][0]),lcd.LCD_LINE_1)
+            printRecState()
+            speaker.p.start(70)
+            speaker.p.ChangeFrequency(notes.octave[note+3][1])
+        elif key == '5':
+            lcd.lcd_string("Key: " + str(notes.octave[note+4][0]),lcd.LCD_LINE_1)
+            printRecState()
+            speaker.p.start(70)
+            speaker.p.ChangeFrequency(notes.octave[note+4][1])
+        elif key == '6':
+            lcd.lcd_string("Key: " + str(notes.octave[note+5][0]),lcd.LCD_LINE_1)
+            printRecState()
+            speaker.p.start(70)
+            speaker.p.ChangeFrequency(notes.octave[note+5][1])
+        elif key == '7':
+            lcd.lcd_string("Key: " + str(notes.octave[note+6][0]),lcd.LCD_LINE_1)
+            printRecState()
+            speaker.p.start(70)
+            speaker.p.ChangeFrequency(notes.octave[note+6][1])
+        elif key == '8':
+            lcd.lcd_string("Key: " + str(notes.octave[note+7][0]),lcd.LCD_LINE_1)
+            printRecState()
+            speaker.p.start(70)
+            speaker.p.ChangeFrequency(notes.octave[note+7][1])
+        elif key == '9':
+            lcd.lcd_string("Key: " + str(notes.octave[note+8][0]),lcd.LCD_LINE_1)
+            printRecState()
+            speaker.p.start(70)
+            speaker.p.ChangeFrequency(notes.octave[note+8][1])
+        elif key == '*':
+            lcd.lcd_string("Key: " + str(notes.octave[note+9][0]),lcd.LCD_LINE_1)
+            printRecState()
+            speaker.p.start(70)
+            speaker.p.ChangeFrequency(notes.octave[note+9][1])
+        elif key == '0':
+            lcd.lcd_string("Key: " + str(notes.octave[note+10][0]),lcd.LCD_LINE_1)
+            printRecState()
+            speaker.p.start(70)
+            speaker.p.ChangeFrequency(notes.octave[note+10][1])
+        elif key == '#':
+            lcd.lcd_string("Key: " + str(notes.octave[note+11][0]),lcd.LCD_LINE_1)
+            printRecState()
+            speaker.p.start(70)
+            speaker.p.ChangeFrequency(notes.octave[note+11][1])
+        elif key == '':
+            lcd.lcd_string("Key: ",lcd.LCD_LINE_1)
+            printRecState()
+            speaker.p.stop()
     elif state == kpState.changeOctaveDown:
         if note - 12 <= 0:
             note = 1
@@ -299,6 +303,11 @@ def Recording(state):
     global validPlaybackChoices
     global waitingInput
     global userChoice
+    global getBPM
+
+    if getBPM:
+        return state
+    
     # transitions
     if state == recState.startRec:
         state = recState.waitRec
@@ -393,8 +402,104 @@ def Recording(state):
 
     return state
 
-numTasks = 2
-period_gcd = 0.01
+class metStates(Enum):
+    startMet = 1
+    getInput = 2
+    releaseButton1 = 3
+    setMet = 4
+    releaseButton2 = 5
+    playMet = 6
+
+metState = Enum('metStates', ['startMet', 'getInput', 'releaseButton1', 'setMet', 'releaseButton2', 'playMet'])
+
+metInput = ''
+#metPeriod = 0.01
+metPeriod = 0.1
+validMetInput = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
+getBPM = True
+playTickCnt = 0
+ticksPerPeriod = 0
+
+tickCnt = 0
+
+def Metronome(state):
+    global metInput
+    global metPeriod
+    global getBPM
+    global playTickCnt
+    global ticksPerPeriod
+    # transitions
+    if state == metState.startMet:
+        state = metState.getInput
+    elif state == metState.getInput:
+        if GPIO.input(26) == 1:
+            state = metState.releaseButton1
+        else:
+            state = metState.getInput
+    elif state == metState.releaseButton1:
+        if GPIO.input(26) == 0:
+            state = metState.setMet
+        else:
+            state = metState.releaseButton1
+    elif state == metState.setMet:
+        state = metState.playMet
+    elif state == metState.releaseButton2:
+        if GPIO.input(19) == 0:
+            state = metState.getInput
+        else:
+            state = metState.releaseButton2
+    elif state == metState.playMet:
+        if GPIO.input(19) == 1:
+            state = metState. releaseButton2
+        else:
+            state = metState.playMet
+
+    # state actions
+    if state == metState.startMet:
+        getBPM = True
+    elif state == metState.getInput:
+        getBPM = True
+        lcd.lcd_string("Enter BPM: ", lcd.LCD_LINE_1)
+        input = getKeyPadInput()
+        if input in validMetInput:
+            metInput += input
+        elif input != '':
+            lcd.lcd_string("invalid input", lcd.LCD_LINE_1)
+            lcd.lcd_string("", lcd.LCD_LINE_2)
+            time.sleep(1)
+        lcd.lcd_string(metInput, lcd.LCD_LINE_2)
+    elif state == metState.releaseButton1:
+        getBPM = True
+    elif state == metState.releaseButton2:
+        getBPM = True
+        metInput = ''
+    elif state == metState.setMet:
+        getBPM = False
+        #if metInput != '':
+        #    metPeriod = 60.00 / float(metInput)
+        #else:
+        #    metPeriod = 0.01
+        ticksPerPeriod = math.floor(60 / metPeriod / float(metInput))
+        print(f"ticksPerPeriod = {ticksPerPeriod}")
+        playTickCnt = 0
+    elif state == metState.playMet:
+        getBPM = False
+        if playTickCnt == ticksPerPeriod:
+            speaker.p1.start(70)
+            global tickCnt
+            print(f"tick {tickCnt}")
+            tickCnt += 1
+            time.sleep(0.01)
+            speaker.p1.stop()
+            playTickCnt = 0
+        else:
+            playTickCnt += 1
+
+    return state
+    
+
+numTasks = 3
+period_gcd = 0.1
 
 def main():
     # Initialise display
@@ -407,10 +512,11 @@ def main():
 
     try:
         # state, period, elapsedTime, func
-        task1 = task(kpState.startKey, 0.01, 0, Piano)
-        task2 = task(recState.startRec, 0.01, 0, Recording)
+        task1 = task(metState.startMet, 0.01, 0, Metronome)
+        task2 = task(kpState.startKey, 0.01, 0, Piano)
+        task3 = task(recState.startRec, 0.01, 0, Recording)
         
-        tasks = [task1, task2]
+        tasks = [task1, task2, task3]
 
         while True:
             # key = ''
@@ -438,7 +544,7 @@ def main():
                     tasks[i].elapsedTime = 0
                 tasks[i].elapsedTime += period_gcd
 
-            time.sleep(period_gcd)
+            # time.sleep(period_gcd)
     except KeyboardInterrupt:
         print("\nApplication stopped!")
 
@@ -455,4 +561,5 @@ if __name__ == '__main__':
         lcd.lcd_byte(0x01, lcd.LCD_CMD)
         lcd.lcd_string("Goodbye!",lcd.LCD_LINE_1)
         speaker.p.stop()
+        speaker.p1.stop()
         GPIO.cleanup()

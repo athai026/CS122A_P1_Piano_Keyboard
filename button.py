@@ -8,6 +8,8 @@ GPIO.setup(16, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 GPIO.setup(20, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 GPIO.setup(21, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 GPIO.setup(5, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(26, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(19, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 
 
@@ -27,6 +29,12 @@ GPIO.setup(5, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 #         print("middle button pushed")
 #     if GPIO.input(21) == 1:
 #         print("bottom button pushed")
+#     if GPIO.input(5) == 1:
+#         print("exit button pushed")
+#     if GPIO.input(26) == 1:
+#         print("confirm button pushed")
+#     if GPIO.input(19) == 1:
+#         print("back button pushed")
 #     time.sleep(0.1)
 
 # message = input("Press enter to quit\n\n")
