@@ -286,8 +286,12 @@ class getRecStates(Enum):
     releasePlayback = 6
     waitChoice = 7
     playPlayback = 8
+    deleteRecordings = 9
+    releaseDelete = 10
+    confirmDelete = 11
+    releaseDelete2 = 12
 
-recState = Enum('getRecStates', ['startRec', 'waitRec', 'releaseRec', 'waitStopRec', 'releaseStopRec', 'releasePlayback', 'waitChoice', 'playPlayback'])
+recState = Enum('getRecStates', ['startRec', 'waitRec', 'releaseRec', 'waitStopRec', 'releaseStopRec', 'releasePlayback', 'waitChoice', 'playPlayback', 'deleteRecordings', 'releaseDelete', 'confirmDelete', 'releaseDelete2'])
 
 recordStart = False
 validPlaybackNum = False
@@ -342,9 +346,28 @@ def Recording(state):
     elif state == recState.waitChoice:
         if validPlaybackNum:
             state = recState.playPlayback
+        elif GPIO.input(16) == 1:
+            state = recState.releaseDelete
         else:
             state = recState.waitChoice
     elif state == recState.playPlayback:
+        state = recState.waitRec
+    elif state == recState.releaseDelete:
+        if GPIO.input(16) == 0:
+            state = recState.confirmDelete
+        else:
+            state = recState.releaseDelete
+    elif state == recState.confirmDelete:
+        if GPIO.input(16) == 1:
+            state = recState.releaseDelete2
+        else:
+            state = recState.confirmDelete
+    elif state == recState.releaseDelete2:
+        if GPIO.input(16) == 0:
+            state = recState.deleteRecordings
+        else:
+            state = recState.releaseDelete2
+    elif state == recState.deleteRecordings:
         state = recState.waitRec
     
     # state actions
@@ -399,6 +422,26 @@ def Recording(state):
                         speaker.p.stop()
                     time.sleep(0.01)
             speaker.p.stop()
+    elif state == recState.releaseDelete:
+        waitingInput = True
+    elif state == recState.confirmDelete:
+        waitingInput = True
+        if GPIO.input(5) == 1:
+            waitingInput = False
+            state = recState.waitRec
+        lcd.lcd_string("Delete all", lcd.LCD_LINE_1)
+        lcd.lcd_string("recordings?", lcd.LCD_LINE_2)
+    elif state == recState.releaseDelete2:
+        waitingInput = True
+    elif state == recState.deleteRecordings:
+        waitingInput = False
+        for x in range(5):
+            recording[x].clear()
+            recording[x].append([])
+        numRecording = 0
+        lcd.lcd_string("All recordings", lcd.LCD_LINE_1)
+        lcd.lcd_string("deleted", lcd.LCD_LINE_2)
+        time.sleep(1)
 
     return state
 
