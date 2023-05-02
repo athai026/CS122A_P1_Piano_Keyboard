@@ -458,6 +458,8 @@ def Metronome(state):
     if state == metState.startMet:
         getBPM = True
     elif state == metState.getInput:
+        if GPIO.input(5) == 1:
+            metInput = ''
         getBPM = True
         lcd.lcd_string("Enter BPM: ", lcd.LCD_LINE_1)
         input = getKeyPadInput()
@@ -509,6 +511,9 @@ def main():
 
     global numTasks
     global period_gcd
+    global recording 
+    recording = np.load("savedRecordings.npy", allow_pickle=True)
+    recording = recording.tolist()
 
     try:
         # state, period, elapsedTime, func
@@ -547,6 +552,8 @@ def main():
             # time.sleep(period_gcd)
     except KeyboardInterrupt:
         print("\nApplication stopped!")
+    finally:
+        np.save("savedRecordings.npy", np.array(recording, dtype=object))
 
     
 
