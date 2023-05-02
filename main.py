@@ -33,6 +33,7 @@ key = '' # key being pressed
 timerStarted = False
 startTime = 0
 endTime = 0
+validPianoKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '*', '#']
 
 def Piano(state):
     global note
@@ -106,66 +107,72 @@ def Piano(state):
     if state == kpState.startKey:
         state = kpState.getKey
     elif state == kpState.getKey:
-        if key == '1':
-            lcd.lcd_string("Key: " + str(notes.octave[note][0]),lcd.LCD_LINE_1)
+        # if key == '1':
+        #     lcd.lcd_string("Key: " + str(notes.octave[note][0]),lcd.LCD_LINE_1)
+        #     printRecState()
+        #     speaker.p.start(70)
+        #     speaker.p.ChangeFrequency(notes.octave[note][1])
+        # elif key == '2':
+        #     lcd.lcd_string("Key: " + str(notes.octave[note+1][0]),lcd.LCD_LINE_1)
+        #     printRecState()
+        #     speaker.p.start(70)
+        #     speaker.p.ChangeFrequency(notes.octave[note+1][1])
+        # elif key == '3':
+        #     lcd.lcd_string("Key: " + str(notes.octave[note+2][0]),lcd.LCD_LINE_1)
+        #     printRecState()
+        #     speaker.p.start(70)
+        #     speaker.p.ChangeFrequency(notes.octave[note+2][1])
+        # elif key == '4':
+        #     lcd.lcd_string("Key: " + str(notes.octave[note+3][0]),lcd.LCD_LINE_1)
+        #     printRecState()
+        #     speaker.p.start(70)
+        #     speaker.p.ChangeFrequency(notes.octave[note+3][1])
+        # elif key == '5':
+        #     lcd.lcd_string("Key: " + str(notes.octave[note+4][0]),lcd.LCD_LINE_1)
+        #     printRecState()
+        #     speaker.p.start(70)
+        #     speaker.p.ChangeFrequency(notes.octave[note+4][1])
+        # elif key == '6':
+        #     lcd.lcd_string("Key: " + str(notes.octave[note+5][0]),lcd.LCD_LINE_1)
+        #     printRecState()
+        #     speaker.p.start(70)
+        #     speaker.p.ChangeFrequency(notes.octave[note+5][1])
+        # elif key == '7':
+        #     lcd.lcd_string("Key: " + str(notes.octave[note+6][0]),lcd.LCD_LINE_1)
+        #     printRecState()
+        #     speaker.p.start(70)
+        #     speaker.p.ChangeFrequency(notes.octave[note+6][1])
+        # elif key == '8':
+        #     lcd.lcd_string("Key: " + str(notes.octave[note+7][0]),lcd.LCD_LINE_1)
+        #     printRecState()
+        #     speaker.p.start(70)
+        #     speaker.p.ChangeFrequency(notes.octave[note+7][1])
+        # elif key == '9':
+        #     lcd.lcd_string("Key: " + str(notes.octave[note+8][0]),lcd.LCD_LINE_1)
+        #     printRecState()
+        #     speaker.p.start(70)
+        #     speaker.p.ChangeFrequency(notes.octave[note+8][1])
+        # elif key == '*':
+        #     lcd.lcd_string("Key: " + str(notes.octave[note+9][0]),lcd.LCD_LINE_1)
+        #     printRecState()
+        #     speaker.p.start(70)
+        #     speaker.p.ChangeFrequency(notes.octave[note+9][1])
+        # elif key == '0':
+        #     lcd.lcd_string("Key: " + str(notes.octave[note+10][0]),lcd.LCD_LINE_1)
+        #     printRecState()
+        #     speaker.p.start(70)
+        #     speaker.p.ChangeFrequency(notes.octave[note+10][1])
+        # elif key == '#':
+        #     lcd.lcd_string("Key: " + str(notes.octave[note+11][0]),lcd.LCD_LINE_1)
+        #     printRecState()
+        #     speaker.p.start(70)
+        #     speaker.p.ChangeFrequency(notes.octave[note+11][1])
+        
+        if key in validPianoKeys:
+            lcd.lcd_string("Key: " + str(notes.octave[note+notes.offsetLUT[key]][0]),lcd.LCD_LINE_1)
             printRecState()
             speaker.p.start(70)
-            speaker.p.ChangeFrequency(notes.octave[note][1])
-        elif key == '2':
-            lcd.lcd_string("Key: " + str(notes.octave[note+1][0]),lcd.LCD_LINE_1)
-            printRecState()
-            speaker.p.start(70)
-            speaker.p.ChangeFrequency(notes.octave[note+1][1])
-        elif key == '3':
-            lcd.lcd_string("Key: " + str(notes.octave[note+2][0]),lcd.LCD_LINE_1)
-            printRecState()
-            speaker.p.start(70)
-            speaker.p.ChangeFrequency(notes.octave[note+2][1])
-        elif key == '4':
-            lcd.lcd_string("Key: " + str(notes.octave[note+3][0]),lcd.LCD_LINE_1)
-            printRecState()
-            speaker.p.start(70)
-            speaker.p.ChangeFrequency(notes.octave[note+3][1])
-        elif key == '5':
-            lcd.lcd_string("Key: " + str(notes.octave[note+4][0]),lcd.LCD_LINE_1)
-            printRecState()
-            speaker.p.start(70)
-            speaker.p.ChangeFrequency(notes.octave[note+4][1])
-        elif key == '6':
-            lcd.lcd_string("Key: " + str(notes.octave[note+5][0]),lcd.LCD_LINE_1)
-            printRecState()
-            speaker.p.start(70)
-            speaker.p.ChangeFrequency(notes.octave[note+5][1])
-        elif key == '7':
-            lcd.lcd_string("Key: " + str(notes.octave[note+6][0]),lcd.LCD_LINE_1)
-            printRecState()
-            speaker.p.start(70)
-            speaker.p.ChangeFrequency(notes.octave[note+6][1])
-        elif key == '8':
-            lcd.lcd_string("Key: " + str(notes.octave[note+7][0]),lcd.LCD_LINE_1)
-            printRecState()
-            speaker.p.start(70)
-            speaker.p.ChangeFrequency(notes.octave[note+7][1])
-        elif key == '9':
-            lcd.lcd_string("Key: " + str(notes.octave[note+8][0]),lcd.LCD_LINE_1)
-            printRecState()
-            speaker.p.start(70)
-            speaker.p.ChangeFrequency(notes.octave[note+8][1])
-        elif key == '*':
-            lcd.lcd_string("Key: " + str(notes.octave[note+9][0]),lcd.LCD_LINE_1)
-            printRecState()
-            speaker.p.start(70)
-            speaker.p.ChangeFrequency(notes.octave[note+9][1])
-        elif key == '0':
-            lcd.lcd_string("Key: " + str(notes.octave[note+10][0]),lcd.LCD_LINE_1)
-            printRecState()
-            speaker.p.start(70)
-            speaker.p.ChangeFrequency(notes.octave[note+10][1])
-        elif key == '#':
-            lcd.lcd_string("Key: " + str(notes.octave[note+11][0]),lcd.LCD_LINE_1)
-            printRecState()
-            speaker.p.start(70)
-            speaker.p.ChangeFrequency(notes.octave[note+11][1])
+            speaker.p.ChangeFrequency(notes.octave[note+notes.offsetLUT[key]][1])
         elif key == '':
             lcd.lcd_string("Key: ",lcd.LCD_LINE_1)
             printRecState()
@@ -229,33 +236,37 @@ def saveRecording(prevKey, start, end):
     global recording
     global note
     global numRecording
+    global validPianoKeys
     # numRecording = checkNumRecordings()
 
     freq = ''
-    if prevKey == '1':
-        freq = notes.octave[note][1]
-    elif prevKey == '2':
-        freq = notes.octave[note+1][1]
-    elif prevKey == '3':
-        freq = notes.octave[note+2][1]
-    elif prevKey == '4':
-        freq = notes.octave[note+3][1]
-    elif prevKey == '5':
-        freq = notes.octave[note+4][1]
-    elif prevKey == '6':
-        freq = notes.octave[note+5][1]
-    elif prevKey == '7':
-        freq = notes.octave[note+6][1]
-    elif prevKey == '8':
-        freq = notes.octave[note+7][1]
-    elif prevKey == '9':
-        freq = notes.octave[note+8][1]
-    elif prevKey == '*':
-        freq = notes.octave[note+9][1]
-    elif prevKey == '0':
-        freq = notes.octave[note+10][1]
-    elif prevKey == '#':
-        freq = notes.octave[note+11][1]
+    # if prevKey == '1':
+    #     freq = notes.octave[note][1]
+    # elif prevKey == '2':
+    #     freq = notes.octave[note+1][1]
+    # elif prevKey == '3':
+    #     freq = notes.octave[note+2][1]
+    # elif prevKey == '4':
+    #     freq = notes.octave[note+3][1]
+    # elif prevKey == '5':
+    #     freq = notes.octave[note+4][1]
+    # elif prevKey == '6':
+    #     freq = notes.octave[note+5][1]
+    # elif prevKey == '7':
+    #     freq = notes.octave[note+6][1]
+    # elif prevKey == '8':
+    #     freq = notes.octave[note+7][1]
+    # elif prevKey == '9':
+    #     freq = notes.octave[note+8][1]
+    # elif prevKey == '*':
+    #     freq = notes.octave[note+9][1]
+    # elif prevKey == '0':
+    #     freq = notes.octave[note+10][1]
+    # elif prevKey == '#':
+    #     freq = notes.octave[note+11][1]
+    
+    if prevKey in validPianoKeys:
+        freq = notes.octave[note+notes.offsetLUT[prevKey]][1]
     else:
         freq = 0
 
@@ -576,8 +587,12 @@ def main():
     global numTasks
     global period_gcd
     global recording 
+    global numRecording
     recording = np.load("savedRecordings.npy", allow_pickle=True)
     recording = recording.tolist()
+    for record in recording:
+        if len(record) > 1:
+            numRecording += 1
 
     try:
         # state, period, elapsedTime, func
