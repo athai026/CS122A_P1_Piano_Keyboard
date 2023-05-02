@@ -401,12 +401,12 @@ def Metronome(state):
         else:
             state = metState.releaseButton2
     elif state == metState.playMet:
-        if GPIO.input(19) == 1:
+        if not inMenu and GPIO.input(19) == 1:
             state = metState.releaseButton2
         else:
             state = metState.playMet
     elif state == metState.noMet:
-        if GPIO.input(19) == 1:
+        if not inMenu and GPIO.input(19) == 1:
             state = metState.releaseButton2
         else:
             state = metState.noMet
