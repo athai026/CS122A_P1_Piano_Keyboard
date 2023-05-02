@@ -19,6 +19,7 @@ timerStarted = False # check timer for recording
 startTime = 0 # for recording
 endTime = 0 # for recording
 validPianoKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '*', '#']
+waitRelease = False # waiting for keypad release
 recording = [[[]], [[]], [[]], [[]], [[]]]
 numRecording = 0
 recordStart = False # if recording
@@ -67,6 +68,7 @@ def Piano(state):
     global endTime
     global waitingInput
     global getBPM
+    global waitRelease
 
     # if waiting for input in Recording or Metronom task, do not execute Piano task
     if getBPM or waitingInput:
@@ -132,7 +134,8 @@ def Piano(state):
     # state actions
     if state == pianoState.startKey:
         state = pianoState.getKey
-    elif state == pianoState.getKey:        
+    elif state == pianoState.getKey:   
+        waitRelease = False     
         if key in validPianoKeys:
             lcd.lcd_string("Key: " + str(notes.octave[note+notes.offsetLUT[key]][0]),lcd.LCD_LINE_1)
             printRecState()
@@ -170,6 +173,8 @@ def Piano(state):
             note += 1
         # print("new note: " + str(note))
         key = ''
+    elif state == pianoState.waitKey:
+        waitRelease = True
 
     return state
 ############################## PIANO TASK ##############################
@@ -373,6 +378,7 @@ def Metronome(state):
     global playTickCnt
     global ticksPerPeriod
     global inMenu
+    global waitRelease
 
     # transitions
     if state == metState.startMet:
@@ -436,7 +442,7 @@ def Metronome(state):
         playTickCnt = 0
     elif state == metState.playMet:
         getBPM = False
-        if not inMenu:
+        if not inMenu and not waitRelease :
             if playTickCnt == ticksPerPeriod:
                 speaker.p1.start(70)
                 global tickCnt
