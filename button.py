@@ -1,43 +1,12 @@
 import RPi.GPIO as GPIO
-import time
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
 
-GPIO.setup(16, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(20, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(21, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(5, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(26, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(19, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(12, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-
-
-
-# def topButton_callback(channel):
-#     print("top button WAS pushed")
-
-# def bottomButton_callback(channel):
-#     print("bottom button WAS pushed")
-
-# GPIO.add_event_detect(20, GPIO.RISING, callback=topButton_callback)
-# GPIO.add_event_detect(21, GPIO.RISING, callback=bottomButton_callback)
-
-# while True: 
-#     if GPIO.input(16) == 1:
-#         print("top button pushed")
-#     if GPIO.input(20) == 1:
-#         print("middle button pushed")
-#     if GPIO.input(21) == 1:
-#         print("bottom button pushed")
-#     if GPIO.input(5) == 1:
-#         print("exit button pushed")
-#     if GPIO.input(26) == 1:
-#         print("confirm button pushed")
-#     if GPIO.input(19) == 1:
-#         print("back button pushed")
-#     time.sleep(0.1)
-
-# message = input("Press enter to quit\n\n")
-
-# GPIO.cleanup()
+GPIO.setup(16, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) # playback & delete playback button
+GPIO.setup(20, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) # stop recording button
+GPIO.setup(21, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) # start recording button
+GPIO.setup(5, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) # back out of playback menu & delete BPM input button
+GPIO.setup(26, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) # confirm BPM button
+GPIO.setup(19, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) # re-enter BPM button
+GPIO.setup(12, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) # kill program button

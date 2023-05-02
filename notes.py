@@ -91,6 +91,7 @@ octave = {
 
 }
 
+# calculating offset for piano keys
 offsetLUT = {
     '1': 0, 
     '2': 1, 

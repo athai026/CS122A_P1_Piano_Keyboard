@@ -10,15 +10,45 @@ from enum import Enum
 from timeit import default_timer as timer
 import numpy as np
 
+############################## GLOBAL VARIABLES ##############################
+numTasks = 3
+period_gcd = 0.1
+note = 40 # starting index of keyboard note
+key = '' # key being pressed
+timerStarted = False # check timer for recording
+startTime = 0 # for recording
+endTime = 0 # for recording
+validPianoKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '*', '#']
+recording = [[[]], [[]], [[]], [[]], [[]]]
+numRecording = 0
+recordStart = False # if recording
+validPlaybackNum = False # if playback slot choice is valid
+validPlaybackChoices = ['1', '2', '3', '4', '5']
+waitingInput = False # waiting for input in Record task 
+userPlaybackNum = '' # user input for playback num
+inMenu = False # if user is in a menu, do not play metronome
+metInput = '' # input for metronome
+metPeriod = 0.1 # metronome period
+validMetInput = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
+getBPM = True
+playTickCnt = 0
+ticksPerPeriod = 0
+tickCnt = 0
+############################## GLOBAL VARIABLES ##############################
+
+
+############################## TASK SCHEDULER CLASS ##############################
 class task:
     def __init__(self, state, period, elapsedTime, func):
         self.state = state
         self.period = period
         self.elapsedTime = elapsedTime
         self.func = func
+############################## TASK SCHEDULER CLASS ##############################
 
 
-class getKeyPadStates(Enum):
+############################# PIANO TASK ##############################
+class pianoStates(Enum):
     startKey = 1
     getKey = 2
     changeOctaveDown = 3
@@ -26,14 +56,7 @@ class getKeyPadStates(Enum):
     changeRangeDown = 5
     changeRangeUp = 6
 
-kpState = Enum('getKeyPadStates', ['startKey', 'getKey', 'waitKey', 'changeOctaveDown', 'changeOctaveUp', 'changeRangeDown', 'changeRangeUp'])
-
-note = 40 # starting index of keyboard note
-key = '' # key being pressed
-timerStarted = False
-startTime = 0
-endTime = 0
-validPianoKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '*', '#']
+pianoState = Enum('pianoStates', ['startKey', 'getKey', 'waitKey', 'changeOctaveDown', 'changeOctaveUp', 'changeRangeDown', 'changeRangeUp'])
 
 def Piano(state):
     global note
@@ -45,10 +68,12 @@ def Piano(state):
     global waitingInput
     global getBPM
 
+    # if waiting for input in Recording or Metronom task, do not execute Piano task
     if getBPM or waitingInput:
         return state
     
-    # transitions
+    # check if key has change
+    # if so, save previous key in recording (if recording)
     prevKey = key
     key = getKeyPadInput()
     if recordStart:
@@ -62,112 +87,52 @@ def Piano(state):
     else:
         timerStarted = False
 
-    if state == kpState.startKey:
-        state = kpState.waitKey
-    elif state == kpState.getKey:
+    # transitions
+    if state == pianoState.startKey:
+        state = pianoState.waitKey
+    elif state == pianoState.getKey:
         if key == 'A':
-            state = kpState.changeRangeDown
+            state = pianoState.changeRangeDown
         elif key == 'B':
-            state = kpState.changeRangeUp
+            state = pianoState.changeRangeUp
         elif key == 'C':
-            state = kpState.changeOctaveDown
+            state = pianoState.changeOctaveDown
         elif key == 'D':
-            state = kpState.changeOctaveUp
+            state = pianoState.changeOctaveUp
         else:
-            state = kpState.getKey
-    elif state == kpState.changeOctaveDown:
+            state = pianoState.getKey
+    elif state == pianoState.changeOctaveDown:
         if key != '':
-            state = kpState.waitKey
+            state = pianoState.waitKey
         else: 
-            state = kpState.getKey
-    elif state == kpState.changeOctaveUp:
+            state = pianoState.getKey
+    elif state == pianoState.changeOctaveUp:
         if key != '':
-            state = kpState.waitKey
+            state = pianoState.waitKey
         else: 
-            state = kpState.getKey
-    elif state == kpState.changeRangeDown:
+            state = pianoState.getKey
+    elif state == pianoState.changeRangeDown:
         if key != '':
-            state = kpState.waitKey
+            state = pianoState.waitKey
         else: 
-            state = kpState.getKey
-    elif state == kpState.changeRangeUp:
+            state = pianoState.getKey
+    elif state == pianoState.changeRangeUp:
         if key != '':
-            state = kpState.waitKey
+            state = pianoState.waitKey
         else: 
-            state = kpState.getKey
-    elif state == kpState.waitKey:
+            state = pianoState.getKey
+    elif state == pianoState.waitKey:
         if key == '':
-            state = kpState.getKey
+            state = pianoState.getKey
         else:
-            state = kpState.waitKey
+            state = pianoState.waitKey
     else:
-        state = kpState.getKey
+        state = pianoState.getKey
 
     # state actions
-    if state == kpState.startKey:
-        state = kpState.getKey
-    elif state == kpState.getKey:
-        # if key == '1':
-        #     lcd.lcd_string("Key: " + str(notes.octave[note][0]),lcd.LCD_LINE_1)
-        #     printRecState()
-        #     speaker.p.start(70)
-        #     speaker.p.ChangeFrequency(notes.octave[note][1])
-        # elif key == '2':
-        #     lcd.lcd_string("Key: " + str(notes.octave[note+1][0]),lcd.LCD_LINE_1)
-        #     printRecState()
-        #     speaker.p.start(70)
-        #     speaker.p.ChangeFrequency(notes.octave[note+1][1])
-        # elif key == '3':
-        #     lcd.lcd_string("Key: " + str(notes.octave[note+2][0]),lcd.LCD_LINE_1)
-        #     printRecState()
-        #     speaker.p.start(70)
-        #     speaker.p.ChangeFrequency(notes.octave[note+2][1])
-        # elif key == '4':
-        #     lcd.lcd_string("Key: " + str(notes.octave[note+3][0]),lcd.LCD_LINE_1)
-        #     printRecState()
-        #     speaker.p.start(70)
-        #     speaker.p.ChangeFrequency(notes.octave[note+3][1])
-        # elif key == '5':
-        #     lcd.lcd_string("Key: " + str(notes.octave[note+4][0]),lcd.LCD_LINE_1)
-        #     printRecState()
-        #     speaker.p.start(70)
-        #     speaker.p.ChangeFrequency(notes.octave[note+4][1])
-        # elif key == '6':
-        #     lcd.lcd_string("Key: " + str(notes.octave[note+5][0]),lcd.LCD_LINE_1)
-        #     printRecState()
-        #     speaker.p.start(70)
-        #     speaker.p.ChangeFrequency(notes.octave[note+5][1])
-        # elif key == '7':
-        #     lcd.lcd_string("Key: " + str(notes.octave[note+6][0]),lcd.LCD_LINE_1)
-        #     printRecState()
-        #     speaker.p.start(70)
-        #     speaker.p.ChangeFrequency(notes.octave[note+6][1])
-        # elif key == '8':
-        #     lcd.lcd_string("Key: " + str(notes.octave[note+7][0]),lcd.LCD_LINE_1)
-        #     printRecState()
-        #     speaker.p.start(70)
-        #     speaker.p.ChangeFrequency(notes.octave[note+7][1])
-        # elif key == '9':
-        #     lcd.lcd_string("Key: " + str(notes.octave[note+8][0]),lcd.LCD_LINE_1)
-        #     printRecState()
-        #     speaker.p.start(70)
-        #     speaker.p.ChangeFrequency(notes.octave[note+8][1])
-        # elif key == '*':
-        #     lcd.lcd_string("Key: " + str(notes.octave[note+9][0]),lcd.LCD_LINE_1)
-        #     printRecState()
-        #     speaker.p.start(70)
-        #     speaker.p.ChangeFrequency(notes.octave[note+9][1])
-        # elif key == '0':
-        #     lcd.lcd_string("Key: " + str(notes.octave[note+10][0]),lcd.LCD_LINE_1)
-        #     printRecState()
-        #     speaker.p.start(70)
-        #     speaker.p.ChangeFrequency(notes.octave[note+10][1])
-        # elif key == '#':
-        #     lcd.lcd_string("Key: " + str(notes.octave[note+11][0]),lcd.LCD_LINE_1)
-        #     printRecState()
-        #     speaker.p.start(70)
-        #     speaker.p.ChangeFrequency(notes.octave[note+11][1])
-        
+    if state == pianoState.startKey:
+        state = pianoState.getKey
+    elif state == pianoState.getKey:        
         if key in validPianoKeys:
             lcd.lcd_string("Key: " + str(notes.octave[note+notes.offsetLUT[key]][0]),lcd.LCD_LINE_1)
             printRecState()
@@ -177,118 +142,41 @@ def Piano(state):
             lcd.lcd_string("Key: ",lcd.LCD_LINE_1)
             printRecState()
             speaker.p.stop()
-    elif state == kpState.changeOctaveDown:
+    elif state == pianoState.changeOctaveDown:
         if note - 12 <= 0:
             note = 1
         else: 
             note -= 12
-        print("new note: " + str(note))
+        # print("new note: " + str(note))
         key = ''
-    elif state == kpState.changeOctaveUp:
+    elif state == pianoState.changeOctaveUp:
         if note + 12 >= 78:
             note = 77
         else:
             note += 12
-        print("new note: " + str(note))
+        # print("new note: " + str(note))
         key = ''
-    elif state == kpState.changeRangeDown:
+    elif state == pianoState.changeRangeDown:
         if note - 1 <= 0:
             note = 1
         else:
             note -= 1
-        print("new note: " + str(note))
+        # print("new note: " + str(note))
         key = ''
-    elif state == kpState.changeRangeUp:
+    elif state == pianoState.changeRangeUp:
         if note + 1 >= 78:
             note = 77
         else:
             note += 1
-        print("new note: " + str(note))
+        # print("new note: " + str(note))
         key = ''
 
     return state
+############################## PIANO TASK ##############################
 
-def printRecState():
-    global recordStart
-    if recordStart == 0:
-        lcd.lcd_string("Not recording",lcd.LCD_LINE_2)
-    elif recordStart == 1:
-        lcd.lcd_string("Recording",lcd.LCD_LINE_2)
 
-def getKeyPadInput():
-    key = ''
-    key = keypad.readLine(keypad.L1, ["1","2","3","A"])
-    if key != '':
-        return key
-    key = keypad.readLine(keypad.L2, ["4","5","6","B"])
-    if key != '':
-        return key
-    key = keypad.readLine(keypad.L3, ["7","8","9","C"])
-    if key != '':
-        return key
-    key = keypad.readLine(keypad.L4, ["*","0","#","D"])
-    return key
-
-recording = [[[]], [[]], [[]], [[]], [[]]]
-numRecording = 0
-
-def saveRecording(prevKey, start, end):
-    global recording
-    global note
-    global numRecording
-    global validPianoKeys
-    # numRecording = checkNumRecordings()
-
-    freq = ''
-    # if prevKey == '1':
-    #     freq = notes.octave[note][1]
-    # elif prevKey == '2':
-    #     freq = notes.octave[note+1][1]
-    # elif prevKey == '3':
-    #     freq = notes.octave[note+2][1]
-    # elif prevKey == '4':
-    #     freq = notes.octave[note+3][1]
-    # elif prevKey == '5':
-    #     freq = notes.octave[note+4][1]
-    # elif prevKey == '6':
-    #     freq = notes.octave[note+5][1]
-    # elif prevKey == '7':
-    #     freq = notes.octave[note+6][1]
-    # elif prevKey == '8':
-    #     freq = notes.octave[note+7][1]
-    # elif prevKey == '9':
-    #     freq = notes.octave[note+8][1]
-    # elif prevKey == '*':
-    #     freq = notes.octave[note+9][1]
-    # elif prevKey == '0':
-    #     freq = notes.octave[note+10][1]
-    # elif prevKey == '#':
-    #     freq = notes.octave[note+11][1]
-    
-    if prevKey in validPianoKeys:
-        freq = notes.octave[note+notes.offsetLUT[prevKey]][1]
-    else:
-        freq = 0
-
-    recording[numRecording].append([freq, start, end])
-
-def checkNumRecordings():
-    global numRecording
-    global recording
-
-    if numRecording >= 5:
-        print("num recordings over 5")
-        recording[0] = recording[1].copy()
-        recording[1] = recording[2].copy()
-        recording[2] = recording[3].copy()
-        recording[3] = recording[4].copy()
-        # recording[4].clear()
-        
-        numRecording = 4
-
-    return numRecording
-        
-class getRecStates(Enum):
+############################## RECORD TASK ##############################
+class recStates(Enum):
     startRec = 1
     waitRec = 2
     releaseRec = 3
@@ -302,14 +190,7 @@ class getRecStates(Enum):
     confirmDelete = 11
     releaseDelete2 = 12
 
-recState = Enum('getRecStates', ['startRec', 'waitRec', 'releaseRec', 'waitStopRec', 'releaseStopRec', 'releasePlayback', 'waitChoice', 'playPlayback', 'deleteRecordings', 'releaseDelete', 'confirmDelete', 'releaseDelete2'])
-
-recordStart = False
-validPlaybackNum = False
-validPlaybackChoices = ['1', '2', '3', '4', '5']
-waitingInput = False
-userChoice = ''
-inMenu = False
+recState = Enum('recStates', ['startRec', 'waitRec', 'releaseRec', 'waitStopRec', 'releaseStopRec', 'releasePlayback', 'waitChoice', 'playPlayback', 'deleteRecordings', 'releaseDelete', 'confirmDelete', 'releaseDelete2'])
 
 def Recording(state):
     global recordStart
@@ -318,10 +199,11 @@ def Recording(state):
     global validPlaybackNum
     global validPlaybackChoices
     global waitingInput
-    global userChoice
+    global userPlaybackNum
     global getBPM
     global inMenu
 
+    # if in metronome menu, do not execute Record task
     if getBPM:
         return state
     
@@ -412,10 +294,10 @@ def Recording(state):
             state = recState.waitRec
         lcd.lcd_string("Which recording?", lcd.LCD_LINE_1)
         lcd.lcd_string("1 2 3 4 5", lcd.LCD_LINE_2)
-        userChoice = getKeyPadInput()
-        if userChoice in validPlaybackChoices:
+        userPlaybackNum = getKeyPadInput()
+        if userPlaybackNum in validPlaybackChoices:
             validPlaybackNum = True
-        elif userChoice != '':
+        elif userPlaybackNum != '':
             validPlaybackNum = False
             lcd.lcd_string("Invalid choice", lcd.LCD_LINE_1)
             lcd.lcd_string("", lcd.LCD_LINE_2)
@@ -424,18 +306,18 @@ def Recording(state):
         inMenu = True
         waitingInput = False
         validPlaybackNum = False
-        recIndex = int(userChoice) - 1
+        recIndex = int(userPlaybackNum) - 1
         if not recording[recIndex][0]:
             lcd.lcd_string("Slot empty", lcd.LCD_LINE_1)
             lcd.lcd_string("", lcd.LCD_LINE_2)
             time.sleep(1)
         else:
-            lcd.lcd_string("Playback " + userChoice,lcd.LCD_LINE_1)
+            lcd.lcd_string("Playback " + userPlaybackNum,lcd.LCD_LINE_1)
             lcd.lcd_string("",lcd.LCD_LINE_2)
             for x in range(len(recording[recIndex])):
-                print(recording[recIndex])
+                # print(recording[recIndex])
                 for y in np.arange(recording[recIndex][x][1], recording[recIndex][x][2], 0.01):
-                    print(y)
+                    # print(y)
                     if recording[recIndex][x][0] != 0:
                         speaker.p.start(70)
                         speaker.p.ChangeFrequency(recording[recIndex][x][0])
@@ -469,7 +351,10 @@ def Recording(state):
         time.sleep(1)
 
     return state
+############################## RECORD TASK ##############################
 
+
+############################## METRONOME TASK ##############################
 class metStates(Enum):
     startMet = 1
     getInput = 2
@@ -481,16 +366,6 @@ class metStates(Enum):
 
 metState = Enum('metStates', ['startMet', 'getInput', 'releaseButton1', 'setMet', 'releaseButton2', 'playMet', 'noMet'])
 
-metInput = ''
-#metPeriod = 0.01
-metPeriod = 0.1
-validMetInput = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
-getBPM = True
-playTickCnt = 0
-ticksPerPeriod = 0
-
-tickCnt = 0
-
 def Metronome(state):
     global metInput
     global metPeriod
@@ -498,6 +373,7 @@ def Metronome(state):
     global playTickCnt
     global ticksPerPeriod
     global inMenu
+
     # transitions
     if state == metState.startMet:
         state = metState.getInput
@@ -554,7 +430,7 @@ def Metronome(state):
         getBPM = False
         if metInput != '':
             ticksPerPeriod = math.floor(60 / metPeriod / float(metInput))
-            print(f"ticksPerPeriod = {ticksPerPeriod}")
+            # print(f"ticksPerPeriod = {ticksPerPeriod}")
         else: 
             state = metState.noMet
         playTickCnt = 0
@@ -564,7 +440,7 @@ def Metronome(state):
             if playTickCnt == ticksPerPeriod:
                 speaker.p1.start(70)
                 global tickCnt
-                print(f"tick {tickCnt}")
+                # print(f"tick {tickCnt}")
                 tickCnt += 1
                 time.sleep(0.01)
                 speaker.p1.stop()
@@ -573,21 +449,82 @@ def Metronome(state):
                 playTickCnt += 1
 
     return state
-    
+############################## METRONOME TASK ##############################
 
-numTasks = 3
-period_gcd = 0.1
+
+############################## HELPER FUNCTION ##############################
+# used in Piano task -- prints recording state
+def printRecState():
+    global recordStart
+    if recordStart == 0:
+        lcd.lcd_string("Not recording",lcd.LCD_LINE_2)
+    elif recordStart == 1:
+        lcd.lcd_string("Recording",lcd.LCD_LINE_2)
+
+# used in Piano, Record, Metronome task -- returns keypad input
+def getKeyPadInput():
+    key = ''
+    key = keypad.readLine(keypad.L1, ["1","2","3","A"])
+    if key != '':
+        return key
+    key = keypad.readLine(keypad.L2, ["4","5","6","B"])
+    if key != '':
+        return key
+    key = keypad.readLine(keypad.L3, ["7","8","9","C"])
+    if key != '':
+        return key
+    key = keypad.readLine(keypad.L4, ["*","0","#","D"])
+    return key
+
+
+# used in Piano task -- saves note played into recording
+def saveRecording(prevKey, start, end):
+    global recording
+    global note
+    global numRecording
+    global validPianoKeys
+
+    freq = ''
+    
+    if prevKey in validPianoKeys:
+        freq = notes.octave[note+notes.offsetLUT[prevKey]][1]
+    else:
+        freq = 0
+
+    recording[numRecording].append([freq, start, end])
+
+# used in Record task -- check if all 5 recording slots are full
+# if so, shift everything by one then record in 5th slot
+def checkNumRecordings():
+    global numRecording
+    global recording
+
+    if numRecording >= 5:
+        # print("num recordings over 5")
+        recording[0] = recording[1].copy()
+        recording[1] = recording[2].copy()
+        recording[2] = recording[3].copy()
+        recording[3] = recording[4].copy()
+        
+        numRecording = 4
+
+    return numRecording
+############################## HELPER FUNCTION ##############################
 
 def main():
-    # Initialise display
+    # Initialize display
     lcd.lcd_start()
     lcd.lcd_string("Keyboard ready",lcd.LCD_LINE_1)
+    
+    # Initialize keypad
     keypad.keypad_start()
 
     global numTasks
     global period_gcd
     global recording 
     global numRecording
+
+    # reload recordings from previous run
     recording = np.load("savedRecordings.npy", allow_pickle=True)
     recording = recording.tolist()
     for record in recording:
@@ -595,53 +532,33 @@ def main():
             numRecording += 1
 
     try:
-        # state, period, elapsedTime, func
+        # initializing tasks
         task1 = task(metState.startMet, period_gcd, 0, Metronome)
-        task2 = task(kpState.startKey, period_gcd, 0, Piano)
+        task2 = task(pianoState.startKey, period_gcd, 0, Piano)
         task3 = task(recState.startRec, period_gcd, 0, Recording)
         
         tasks = [task1, task2, task3]
 
         while True:
-            # key = ''
-            # temp = ''
-            # temp = keypad.readLine(L1, ["1","2","3","A"])
-            # if temp != '':
-            #     print("key pressed: " + temp)
-            # temp = keypad.readLine(L2, ["4","5","6","B"])
-            # if temp != '':
-            #     print("key pressed: " + temp)
-            # temp = keypad.readLine(L3, ["7","8","9","C"])
-            # if temp != '':
-            #     print("key pressed: " + temp)
-            # temp = keypad.readLine(L4, ["*","0","#","D"])
-            # if temp != '':
-            #     print("key pressed: " + temp)
-            # time.sleep(0.01)
-            
-            # state1= Piano(state1)
-            # state2 = Recording(state2)
             interrupted = False
             for i in range(numTasks):
                 if (tasks[i].elapsedTime >= tasks[i].period):
                     tasks[i].state = tasks[i].func(tasks[i].state)
                     tasks[i].elapsedTime = 0
                 tasks[i].elapsedTime += period_gcd
+                
+                # kill switch
                 if GPIO.input(12) == 1:
                     interrupted = True
 
             if interrupted:
                 break
-
-            # time.sleep(period_gcd)
     except KeyboardInterrupt:
-        print("\nApplication stopped!")
+        # print("\nApplication stopped!")
+        pass
     finally:
-        np.save("savedRecordings.npy", np.array(recording, dtype=object))
-
-    
-
-    
+        np.save("savedRecordings.npy", np.array(recording, dtype=object)) # save recordings for next run
+           
  
 if __name__ == '__main__':
     try:
