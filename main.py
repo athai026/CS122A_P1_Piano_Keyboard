@@ -298,6 +298,7 @@ validPlaybackNum = False
 validPlaybackChoices = ['1', '2', '3', '4', '5']
 waitingInput = False
 userChoice = ''
+inMenu = False
 
 def Recording(state):
     global recordStart
@@ -308,6 +309,7 @@ def Recording(state):
     global waitingInput
     global userChoice
     global getBPM
+    global inMenu
 
     if getBPM:
         return state
@@ -373,20 +375,27 @@ def Recording(state):
     # state actions
     if state == recState.startRec:
         recordStart = False
+        inMenu = False
     elif state == recState.waitRec:
         recordStart = False
+        inMenu = False
     elif state == recState.releaseRec:
         recordStart = False
+        inMenu = False
         numRecording = checkNumRecordings()
         recording[numRecording].clear()
     elif state == recState.waitStopRec:
         recordStart = True
+        inMenu = False
     elif state == recState.releaseStopRec:
         recordStart = True
+        inMenu = False
     elif state == recState.releasePlayback:
         recordStart = False
+        inMenu = False
     elif state == recState.waitChoice:
         waitingInput = True
+        inMenu = True
         if GPIO.input(5) == 1:
             waitingInput = False
             state = recState.waitRec
@@ -401,6 +410,7 @@ def Recording(state):
             lcd.lcd_string("", lcd.LCD_LINE_2)
             time.sleep(1)
     elif state == recState.playPlayback:
+        inMenu = True
         waitingInput = False
         validPlaybackNum = False
         recIndex = int(userChoice) - 1
@@ -424,8 +434,10 @@ def Recording(state):
             speaker.p.stop()
     elif state == recState.releaseDelete:
         waitingInput = True
+        inMenu = True
     elif state == recState.confirmDelete:
         waitingInput = True
+        inMenu = True
         if GPIO.input(5) == 1:
             waitingInput = False
             state = recState.waitRec
@@ -433,8 +445,10 @@ def Recording(state):
         lcd.lcd_string("recordings?", lcd.LCD_LINE_2)
     elif state == recState.releaseDelete2:
         waitingInput = True
+        inMenu = True
     elif state == recState.deleteRecordings:
         waitingInput = False
+        inMenu = True
         for x in range(5):
             recording[x].clear()
             recording[x].append([])
@@ -471,6 +485,7 @@ def Metronome(state):
     global getBPM
     global playTickCnt
     global ticksPerPeriod
+    global inMenu
     # transitions
     if state == metState.startMet:
         state = metState.getInput
@@ -529,16 +544,17 @@ def Metronome(state):
         playTickCnt = 0
     elif state == metState.playMet:
         getBPM = False
-        if playTickCnt == ticksPerPeriod:
-            speaker.p1.start(70)
-            global tickCnt
-            print(f"tick {tickCnt}")
-            tickCnt += 1
-            time.sleep(0.01)
-            speaker.p1.stop()
-            playTickCnt = 0
-        else:
-            playTickCnt += 1
+        if not inMenu:
+            if playTickCnt == ticksPerPeriod:
+                speaker.p1.start(70)
+                global tickCnt
+                print(f"tick {tickCnt}")
+                tickCnt += 1
+                time.sleep(0.01)
+                speaker.p1.stop()
+                playTickCnt = 0
+            else:
+                playTickCnt += 1
 
     return state
     
@@ -560,9 +576,9 @@ def main():
 
     try:
         # state, period, elapsedTime, func
-        task1 = task(metState.startMet, 0.01, 0, Metronome)
-        task2 = task(kpState.startKey, 0.01, 0, Piano)
-        task3 = task(recState.startRec, 0.01, 0, Recording)
+        task1 = task(metState.startMet, period_gcd, 0, Metronome)
+        task2 = task(kpState.startKey, period_gcd, 0, Piano)
+        task3 = task(recState.startRec, period_gcd, 0, Recording)
         
         tasks = [task1, task2, task3]
 
