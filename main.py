@@ -466,8 +466,9 @@ class metStates(Enum):
     setMet = 4
     releaseButton2 = 5
     playMet = 6
+    noMet = 7
 
-metState = Enum('metStates', ['startMet', 'getInput', 'releaseButton1', 'setMet', 'releaseButton2', 'playMet'])
+metState = Enum('metStates', ['startMet', 'getInput', 'releaseButton1', 'setMet', 'releaseButton2', 'playMet', 'noMet'])
 
 metInput = ''
 #metPeriod = 0.01
@@ -508,9 +509,14 @@ def Metronome(state):
             state = metState.releaseButton2
     elif state == metState.playMet:
         if GPIO.input(19) == 1:
-            state = metState. releaseButton2
+            state = metState.releaseButton2
         else:
             state = metState.playMet
+    elif state == metState.noMet:
+        if GPIO.input(19) == 1:
+            state = metState.releaseButton2
+        else:
+            state = metState.noMet
 
     # state actions
     if state == metState.startMet:
@@ -535,12 +541,11 @@ def Metronome(state):
         metInput = ''
     elif state == metState.setMet:
         getBPM = False
-        #if metInput != '':
-        #    metPeriod = 60.00 / float(metInput)
-        #else:
-        #    metPeriod = 0.01
-        ticksPerPeriod = math.floor(60 / metPeriod / float(metInput))
-        print(f"ticksPerPeriod = {ticksPerPeriod}")
+        if metInput != '':
+            ticksPerPeriod = math.floor(60 / metPeriod / float(metInput))
+            print(f"ticksPerPeriod = {ticksPerPeriod}")
+        else: 
+            state = metState.noMet
         playTickCnt = 0
     elif state == metState.playMet:
         getBPM = False
@@ -601,12 +606,17 @@ def main():
             
             # state1= Piano(state1)
             # state2 = Recording(state2)
-
+            interrupted = False
             for i in range(numTasks):
                 if (tasks[i].elapsedTime >= tasks[i].period):
                     tasks[i].state = tasks[i].func(tasks[i].state)
                     tasks[i].elapsedTime = 0
                 tasks[i].elapsedTime += period_gcd
+                if GPIO.input(12) == 1:
+                    interrupted = True
+
+            if interrupted:
+                break
 
             # time.sleep(period_gcd)
     except KeyboardInterrupt:
