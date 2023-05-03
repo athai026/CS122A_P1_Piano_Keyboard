@@ -52,10 +52,11 @@ class task:
 class pianoStates(Enum):
     startKey = 1
     getKey = 2
-    changeOctaveDown = 3
-    changeOctaveUp = 4
-    changeRangeDown = 5
-    changeRangeUp = 6
+    waitKey = 3
+    changeOctaveDown = 4
+    changeOctaveUp = 5
+    changeRangeDown = 6
+    changeRangeUp = 7
 
 pianoState = Enum('pianoStates', ['startKey', 'getKey', 'waitKey', 'changeOctaveDown', 'changeOctaveUp', 'changeRangeDown', 'changeRangeUp'])
 
